@@ -1,7 +1,10 @@
+import World from "@/r3f/World";
 import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="font-sans min-h-screen p-8 pb-20 sm:p-20"></div>
+    <div className="min-h-screen min-w-screen">
+      <World />
+    </div>
   );
 }
