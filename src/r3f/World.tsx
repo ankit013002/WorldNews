@@ -1,40 +1,96 @@
 "use client";
 
-import { memo, Suspense, useEffect, useMemo, useRef } from "react";
+import { memo, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
+import { Environment, Html, OrbitControls, useGLTF } from "@react-three/drei";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js";
 import * as THREE from "three";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { ArticleType } from "@/app/page";
 
-/**
- * EarthModel now uses useGLTF + KTX2Loader
- */
-const EarthModel = () => {
+interface WorldProps {
+  articles: ArticleType[];
+}
+
+function Pin({
+  title,
+  lat,
+  lon,
+  radius = 1,
+  size = 0.03,
+  color = "red",
+}: {
+  title?: string;
+  lat: number;
+  lon: number;
+  radius?: number;
+  size?: number;
+  color?: string;
+}) {
+  const latRad = THREE.MathUtils.degToRad(lat);
+  const lonRad = THREE.MathUtils.degToRad(lon);
+  const x = radius * Math.cos(latRad) * Math.sin(lonRad);
+  const y = radius * Math.sin(latRad);
+  const z = radius * Math.cos(latRad) * Math.cos(lonRad);
+
+  const [expand, setExpand] = useState(false);
+
+  return (
+    <>
+      <mesh position={[x, y, z]}>
+        <sphereGeometry args={[size, 16, 16]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      <Html position={[x, y, z]} center>
+        <>
+          {expand ? (
+            <div className="bg-red-500 bg-center w-[50vw] max-w-[900px] h-[50vh] max-h-[500px]">
+              {title}
+              <button className="btn" onClick={() => setExpand(false)}></button>
+            </div>
+          ) : (
+            <button
+              style={{
+                background: "blue",
+                width: "1vw",
+                height: "1vh",
+                fontSize: "0.8rem",
+                cursor: "pointer",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpand(true);
+              }}
+            >
+              {title}
+            </button>
+          )}
+        </>
+      </Html>
+    </>
+  );
+}
+
+const EarthModel = ({ articles }: WorldProps) => {
   const gl = useThree((state) => state.gl);
   const groupRef = useRef(null);
   const globeRef = useRef(null);
   const cloudsRef = useRef(null);
 
-  // load your KTX2-optimized .glb
   const { scene } = useGLTF(
     "/earth/ktx_scene.glb",
     undefined,
     undefined,
     (loader) => {
       const draco = new DRACOLoader();
-      draco.setDecoderPath("/draco/"); // where you put decoder files
-      draco.setWorkerLimit(4); // up to 4 worker threads
+      draco.setDecoderPath("/draco/");
+      draco.setWorkerLimit(4);
       loader.setDRACOLoader(draco);
 
-      //
-      // 2) KTX2 in WebWorker
-      //
       const ktx2 = new KTX2Loader();
-      ktx2.setTranscoderPath("/basis/"); // where you put transcoder files
+      ktx2.setTranscoderPath("/basis/");
       ktx2.detectSupport(gl);
-      // tell it to spin up a worker per transcoder script
-      ktx2.setWorkerLimit(2); // limit concurrency
+      ktx2.setWorkerLimit(2);
       loader.setKTX2Loader(ktx2);
     }
   );
@@ -44,39 +100,77 @@ const EarthModel = () => {
     cloudsRef.current = scene.getObjectByName("EarthClouds");
   }, [scene]);
 
-  // spin them
   useFrame((_, delta) => {
-    if (globeRef.current) globeRef.current.rotation.z += delta / 5;
-    if (cloudsRef.current) cloudsRef.current.rotation.z += delta / 8;
+    // if (globeRef.current) globeRef.current.rotation.z += delta / 5;
+    // if (cloudsRef.current) cloudsRef.current.rotation.z += delta / 8;
   });
 
+  if (!globeRef) {
+    return (
+      <group ref={groupRef} scale={0.8} position={[2, 0, -0.5]}>
+        <primitive object={scene} />
+      </group>
+    );
+  }
+
   return (
-    <group ref={groupRef} scale={0.8} position={[2, 0, -0.5]}>
+    <group ref={groupRef} scale={0.8}>
       <primitive object={scene} />
+      {articles.map((article, index) => {
+        const { lat, long } = getlatLong();
+        return (
+          <Pin
+            title={article.title}
+            key={index}
+            lat={newsItem.lat}
+            lon={newsItem.long}
+            radius={5}
+            size={0.03}
+            color="red"
+          />
+        );
+      })}
+      <Pin
+        title="null island"
+        lat={0}
+        lon={0}
+        radius={5}
+        size={0.03}
+        color="red"
+      />
     </group>
   );
 };
 
-function SetCameraAroundEarth() {
-  const { camera } = useThree();
+function EarthOrbitControls() {
+  const { camera, gl } = useThree();
+  const controlsRef = useRef<THREE.OrbitControls>(null!);
+
   useEffect(() => {
-    camera.position.set(-3, 0, 5);
-    camera.lookAt(0, 0, 0);
-  }, [camera]);
-  return null;
+    if (!controlsRef.current) return;
+
+    // centre of the globe
+    controlsRef.current.target.set(0, 0, 0);
+
+    // don’t let the user pan the target away
+    controlsRef.current.enablePan = false;
+
+    controlsRef.current.update();
+  }, []);
+
+  return <OrbitControls ref={controlsRef} args={[camera, gl.domElement]} />;
 }
 
-export default function World() {
+export default function World({ articles }: WorldProps) {
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
-      <Canvas camera={{ position: [10, 0, 10], fov: 90, near: 0.1, far: 1000 }}>
+      <Canvas camera={{ position: [5, 0, 5], fov: 90, near: 0.1, far: 1000 }}>
         <ambientLight intensity={2} />
         <Suspense fallback={null}>
-          <EarthModel />
+          <EarthModel articles={articles} />
           <Environment files="/hdr/HDR_white_local_star.hdr" background />
         </Suspense>
-        <SetCameraAroundEarth />
-        <OrbitControls />
+        <EarthOrbitControls />
       </Canvas>
     </div>
   );
