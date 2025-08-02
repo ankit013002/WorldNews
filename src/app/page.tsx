@@ -1,5 +1,7 @@
+import NewsData from "@/components/NewsData";
 import World from "@/r3f/World";
 import Image from "next/image";
+import { GetLocationsOfArticles } from "./utils/LocationSystem";
 
 export type ArticleType = {
   author: string;
@@ -13,6 +15,7 @@ export type ArticleType = {
   urL: string;
   urlToImage: string;
   content?: string;
+  country: string | null;
 };
 
 export default async function Home() {
@@ -25,10 +28,13 @@ export default async function Home() {
   const resJson = await response.json();
   const articles: ArticleType[] = resJson.articles;
 
+  const serializedArticles = await GetLocationsOfArticles(articles);
+
   console.log(articles);
 
   return (
     <div className="min-h-screen min-w-screen flex flex-col justify-items-center items-center gap-y-5">
+      {/* <NewsData /> */}
       {articles.map((article, index) => {
         return (
           <div key={index} className="card bg-base-100 w-[50vw] shadow-sm">
