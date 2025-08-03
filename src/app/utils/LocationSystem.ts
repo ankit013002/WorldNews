@@ -10,7 +10,7 @@ export type ArticleType = {
     name: string;
   };
   title: string;
-  urL: string;
+  url: string;
   urlToImage: string;
   content?: string;
   location?: {
@@ -62,6 +62,8 @@ export async function extractPlace(
 
   const prompt = `Task: Extract ONE most specific geographic location from the
 news text.
+- If the text says where it is talking about take that.
+- If the text doesn't specify, then figure out where the test is from.
 - Prefer city > region/state > country.
 - If none found, reply exactly: null
 - Output ONLY JSON like {"place":"<text>"} OR the word null.
@@ -100,7 +102,7 @@ export async function geocode(place: string): Promise<LatLon | null> {
   const res = await fetch(url, {
     headers: { "User-Agent": "WorldNewsApp/1.0" },
   });
-  let hits: any[] = [];
+  let hits = [];
   try {
     hits = await res.json();
   } catch {
