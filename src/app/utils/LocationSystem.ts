@@ -64,7 +64,8 @@ export async function extractPlace(
 news text.
 - Prefer city > region/state > country.
 - If none found, reply exactly: null
-- Output ONLY JSON like {"place":"<text>"} OR the word null
+- Output ONLY JSON like {"place":"<text>"} OR the word null.
+- If the location could refer to multiple places, include both region and country
 
 Text:
 ${seed}`;

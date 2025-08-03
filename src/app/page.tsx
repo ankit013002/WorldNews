@@ -24,33 +24,6 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen min-w-screen flex flex-col justify-items-center items-center gap-y-5">
-      {/* <NewsData /> */}
-      {/* {articles.map((article, index) => {
-        return (
-          <div key={index} className="card bg-base-100 w-[50vw] shadow-sm">
-            <figure>
-              {article.urlToImage && article.urlToImage.length > 0 && (
-                <Image
-                  src={article.urlToImage}
-                  alt="Image"
-                  width={1000}
-                  height={1000}
-                />
-              )}
-            </figure>
-            <div className="card-body">
-              <h2 className="card-title">Card Title</h2>
-              <p>
-                A card component has a figure, a body part, and inside body
-                there are title and actions parts
-              </p>
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary">Buy Now</button>
-              </div>
-            </div>
-          </div>
-        );
-      })} */}
       <World articles={refinedArticles} />
     </div>
   );
