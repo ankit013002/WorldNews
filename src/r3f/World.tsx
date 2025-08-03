@@ -198,39 +198,92 @@ function EarthOrbitControls() {
 }
 
 export default function World() {
-  const [articles, setArticles] = useState<ArticleType[]>([]);
+  const [locationBasedArticles, setLocationBasedArticles] = useState<
+    ArticleType[]
+  >([]);
+  const [allArtciles, setAllArticles] = useState<ArticleType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [articleSelection, setArticleSelection] = useState<string>("Business");
 
   useEffect(() => {
-    async function LoadArticles() {
-      fetch(`/api/news?category=${articleSelection}`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setIsLoading(false);
-          console.log(data);
-          setArticles(data.articles);
-        });
-    }
+    // async function LoadArticles() {
+    //   fetch(`/api/news?category=${articleSelection}`, {
+    //     method: "GET",
+    //     headers: {
+    //       Accept: "application/json",
+    //     },
+    //   })
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //       setIsLoading(false);
+    //       console.log(data);
+    //       setArticles(data.articles);
+    //     });
+    // }
+    // LoadArticles();
 
-    LoadArticles();
+    setAllArticles(() => {
+      return FetchMockData();
+    });
+    setLocationBasedArticles(() => {
+      return FetchMockData();
+    });
+    setIsLoading(false);
   }, [articleSelection]);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  console.log("Articles:", articles);
+  console.log("Articles:", allArtciles);
+  console.log("Articles:", locationBasedArticles);
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <Canvas camera={{ position: [5, 0, 5], fov: 90, near: 0.1, far: 1000 }}>
         <Html
           fullscreen
-          className="absolute top-0  pointer-events-none select-none"
+          className="absolute left-0 w-auto pointer-events-none select-none"
+          onDrag={(e) => e.preventDefault()}
+        >
+          <div className="pointer-events-auto my-[8vh]">
+            <div
+              onWheel={(e) => e.stopPropagation()}
+              className="inline-flex flex-col overflow-y-scroll w-auto max-h-[90vh] gap-y-5"
+            >
+              {allArtciles.map((article, index) => {
+                return (
+                  <div
+                    onPointerDown={(e) => e.stopPropagation()}
+                    key={index}
+                    className="card bg-gray-200/5 w-80 shadow-sm"
+                  >
+                    {article.urlToImage && article.urlToImage.length > 0 && (
+                      <figure>
+                        <Image
+                          src={article.urlToImage}
+                          alt="Shoes"
+                          width={1000}
+                          height={1000}
+                        />
+                      </figure>
+                    )}
+                    <div className="card-body">
+                      <div className="card-title text-[1rem]">
+                        {article.title}
+                      </div>
+                      <p className="text-[.8rem]">{article.description}</p>
+                      <div className="card-actions justify-end">
+                        <button className="btn btn-primary">Buy Now</button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </Html>
+        <Html
+          fullscreen
+          className="absolute top-0 pointer-events-none select-none"
           onDrag={(e) => e.preventDefault()}
         >
           <div className="pointer-events-auto">
@@ -242,7 +295,7 @@ export default function World() {
         </Html>
         <ambientLight intensity={2} />
         <Suspense fallback={null}>
-          <EarthModel articles={articles!} />
+          <EarthModel articles={locationBasedArticles!} />
           <Environment files="/hdr/HDR_white_local_star.hdr" background />
         </Suspense>
         <EarthOrbitControls />
