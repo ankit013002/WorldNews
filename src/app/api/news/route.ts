@@ -1,36 +1,54 @@
+import {
+  ArticleType,
+  getLocationsOfArticles,
+} from "@/app/utils/LocationSystem";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const category = searchParams.get("category");
+
+  if (!category) {
+    return NextResponse.json({
+      status: 400,
+      message: "Category doesn't exist",
+    });
+  }
+
   try {
-    const key = process.env.NEWS_DATA_API_KEY;
-    if (!key) {
-      console.error("Missing NEWS_DATA_API_KEY in environment");
-      return NextResponse.json(
-        { error: "Server misconfiguration" },
-        { status: 500 }
-      );
-    }
+    const url = new URL("https://newsapi.org/v2/top-headlines");
+    url.searchParams.set("pageSize", "25");
+    url.searchParams.set("category", category);
+    url.searchParams.set("apiKey", process.env.NEWS_API_KEY!);
 
-    const res = await fetch(`https://www.newsdata.io/api/1/news?apikey=${key}`);
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("NewsData API error:", res.status, text);
-      return NextResponse.json(
-        { error: `NewsData API responded ${res.status}` },
-        { status: 502 }
-      );
-    }
+    const response = await fetch(url.toString());
+    const resJson = await response.json();
+    const articles: ArticleType[] = resJson.articles;
 
-    const data = await res.json();
-    return NextResponse.json(data);
+    await getLocationsOfArticles(articles);
+
+    console.log(articles);
+    const refinedArticles = articles.filter(
+      (article) =>
+        article.location?.lat != null && article.location?.lon != null
+    );
+    console.log(refinedArticles);
+    return NextResponse.json({
+      status: 200,
+      message: "Category doesn't exist",
+      articles: refinedArticles,
+    });
   } catch (err) {
     if (err instanceof Error) {
-      return NextResponse.json(
-        { error: err.message || "Unknown error" },
-        { status: 500 }
-      );
+      return NextResponse.json({
+        status: 500,
+        message: `Server side error: ${err}`,
+      });
     } else {
-      console.error("Unexpected /api/news error:", err);
+      return NextResponse.json({
+        status: 500,
+        message: "Unknown Error",
+      });
     }
   }
 }

@@ -19,6 +19,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArticleType } from "@/app/page";
 import Image from "next/image";
 import NewsCard from "@/components/NewsCard";
+import Filter from "@/components/Filter";
+import { FetchMockData } from "@/app/utils/MockData";
+import { FetchNewsData } from "@/app/utils/FetchNewsData";
 
 interface WorldProps {
   articles: ArticleType[];
@@ -194,13 +197,52 @@ function EarthOrbitControls() {
   return <OrbitControls ref={controlsRef} args={[camera, gl.domElement]} />;
 }
 
-export default function World({ articles }: WorldProps) {
+export default function World() {
+  const [articles, setArticles] = useState<ArticleType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [articleSelection, setArticleSelection] = useState<string>("Business");
+
+  useEffect(() => {
+    async function LoadArticles() {
+      fetch(`/api/news?category=${articleSelection}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setIsLoading(false);
+          console.log(data);
+          setArticles(data.articles);
+        });
+    }
+
+    LoadArticles();
+  }, [articleSelection]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  console.log("Articles:", articles);
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <Canvas camera={{ position: [5, 0, 5], fov: 90, near: 0.1, far: 1000 }}>
+        <Html
+          fullscreen
+          className="absolute top-0  pointer-events-none select-none"
+          onDrag={(e) => e.preventDefault()}
+        >
+          <div className="pointer-events-auto">
+            <Filter
+              articleSelection={articleSelection}
+              setArticleSelection={setArticleSelection}
+            />
+          </div>
+        </Html>
         <ambientLight intensity={2} />
         <Suspense fallback={null}>
-          <EarthModel articles={articles} />
+          <EarthModel articles={articles!} />
           <Environment files="/hdr/HDR_white_local_star.hdr" background />
         </Suspense>
         <EarthOrbitControls />
