@@ -5,10 +5,11 @@ import React, { Dispatch, SetStateAction } from "react";
 
 interface NewsCardProps {
   article: ArticleType;
-  setExpand: Dispatch<SetStateAction<boolean>>;
-  setIsAnyOpen: Dispatch<SetStateAction<boolean>>;
-  setThisOpen: Dispatch<SetStateAction<boolean>>;
-  camera: Camera;
+  setExpand?: Dispatch<SetStateAction<boolean>>;
+  setIsAnyOpen?: Dispatch<SetStateAction<boolean>>;
+  setThisOpen?: Dispatch<SetStateAction<boolean>>;
+  setFocusedArticle?: Dispatch<SetStateAction<boolean>>;
+  camera?: Camera;
 }
 
 const NewsCard = ({
@@ -16,6 +17,7 @@ const NewsCard = ({
   setExpand,
   setIsAnyOpen,
   setThisOpen,
+  setFocusedArticle,
   camera,
 }: NewsCardProps) => {
   const formatDate = (dateString: string) => {
@@ -45,30 +47,58 @@ const NewsCard = ({
             {article.source?.name || "Unknown Source"}
           </span>
         </div>
-        <button
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
-          onClick={(e) => {
-            e.stopPropagation();
-            setExpand(false);
-            setIsAnyOpen(false);
-            setThisOpen(false);
-            camera.translateZ(-3);
-          }}
-        >
-          <svg
-            className="w-5 h-5 text-gray-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {setExpand && setIsAnyOpen && setThisOpen && camera ? (
+          <button
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpand(false);
+              setIsAnyOpen(false);
+              setThisOpen(false);
+              camera.translateZ(-3);
+            }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+            <svg
+              className="w-5 h-5 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        ) : (
+          setFocusedArticle &&
+          setIsAnyOpen && (
+            <button
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAnyOpen(false);
+                setFocusedArticle(false);
+              }}
+            >
+              <svg
+                className="w-5 h-5 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )
+        )}
       </div>
 
       <div

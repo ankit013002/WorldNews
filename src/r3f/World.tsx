@@ -22,9 +22,15 @@ import NewsCard from "@/components/NewsCard";
 import Filter from "@/components/Filter";
 import { FetchMockData } from "@/app/utils/MockData";
 import { FetchNewsData } from "@/app/utils/FetchNewsData";
+import {
+  TbLayoutSidebarLeftCollapse,
+  TbLayoutSidebarRightCollapse,
+} from "react-icons/tb";
 
 interface WorldProps {
   articles: ArticleType[];
+  setIsAnyOpen: Dispatch<SetStateAction<boolean>>;
+  isAnyOpen: boolean;
 }
 
 function Pin({
@@ -117,12 +123,11 @@ function Pin({
     );
 }
 
-const EarthModel = ({ articles }: WorldProps) => {
+const EarthModel = ({ articles, setIsAnyOpen, isAnyOpen }: WorldProps) => {
   const gl = useThree((state) => state.gl);
   const groupRef = useRef(null);
   const globeRef = useRef(null);
   const cloudsRef = useRef(null);
-  const [isAnyOpen, setIsAnyOpen] = useState(false);
 
   const { scene } = useGLTF(
     "/earth/ktx_scene.glb",
@@ -204,6 +209,9 @@ export default function World() {
   const [allArtciles, setAllArticles] = useState<ArticleType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [articleSelection, setArticleSelection] = useState<string>("Business");
+  const [focusedArticle, setFocusedArticle] = useState<ArticleType>();
+  const [isAnyOpen, setIsAnyOpen] = useState(false);
+  const [sideBarCollapsed, setSideBarCollapsed] = useState<boolean>(false);
 
   useEffect(() => {
     // async function LoadArticles() {
@@ -245,39 +253,100 @@ export default function World() {
           onDrag={(e) => e.preventDefault()}
         >
           <div className="pointer-events-auto my-[8vh]">
-            <div
-              onWheel={(e) => e.stopPropagation()}
-              className="inline-flex flex-col overflow-y-scroll w-auto max-h-[90vh] gap-y-5"
-            >
-              {allArtciles.map((article, index) => {
-                return (
-                  <div
-                    onPointerDown={(e) => e.stopPropagation()}
-                    key={index}
-                    className="card bg-gray-200/5 w-80 shadow-sm"
-                  >
-                    {article.urlToImage && article.urlToImage.length > 0 && (
-                      <figure>
-                        <Image
-                          src={article.urlToImage}
-                          alt="Shoes"
-                          width={1000}
-                          height={1000}
-                        />
-                      </figure>
-                    )}
-                    <div className="card-body">
-                      <div className="card-title text-[1rem]">
-                        {article.title}
-                      </div>
-                      <p className="text-[.8rem]">{article.description}</p>
-                      <div className="card-actions justify-end">
-                        <button className="btn btn-primary">Buy Now</button>
+            {focusedArticle && (
+              <div className="top-[25vh] left-[25vw] absolute bg-white/25 backdrop-blur-lg border border-gray-200/50 rounded-2xl shadow-2xl w-[60vw] max-w-[800px] h-[65vh] max-h-[600px] flex flex-col overflow-hidden">
+                <NewsCard
+                  setIsAnyOpen={setIsAnyOpen}
+                  article={focusedArticle}
+                  setFocusedArticle={setFocusedArticle}
+                />
+              </div>
+            )}
+            <div className="flex">
+              <div
+                onWheel={(e) => e.stopPropagation()}
+                className={`inline-flex flex-col overflow-y-scroll max-h-[90vh] gap-y-5 transition-all duration-500 ease-in-out ${
+                  sideBarCollapsed ? "w-0" : "w-90"
+                }`}
+              >
+                {allArtciles.map((article, index) => {
+                  return (
+                    <div
+                      onClick={() => {
+                        setIsAnyOpen(true);
+                        setFocusedArticle(article);
+                      }}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      key={index}
+                      className="card bg-gray-200/5 w-85 shadow-sm cursor-pointer"
+                    >
+                      {article.urlToImage && article.urlToImage.length > 0 && (
+                        <figure>
+                          <Image
+                            src={article.urlToImage}
+                            alt="Shoes"
+                            width={1000}
+                            height={1000}
+                          />
+                        </figure>
+                      )}
+                      <div className="card-body">
+                        <div className="card-title text-[1rem]">
+                          {article.title}
+                        </div>
+                        <p className="text-[.8rem]">{article.description}</p>
+                        {article.url && (
+                          <div className="flex justify-end items-center">
+                            {article.url && (
+                              <a
+                                href={article.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Read Full Article
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                  />
+                                </svg>
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              <div className="flex items-start">
+                <div
+                  className="tooltip tooltip-right"
+                  data-tip={`${
+                    sideBarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"
+                  }`}
+                >
+                  <button
+                    className="btn btn-ghost w-10 p-0"
+                    onClick={() => setSideBarCollapsed(!sideBarCollapsed)}
+                  >
+                    {sideBarCollapsed ? (
+                      <TbLayoutSidebarRightCollapse className="w-full h-full" />
+                    ) : (
+                      <TbLayoutSidebarLeftCollapse className="w-full h-full" />
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </Html>
@@ -295,7 +364,11 @@ export default function World() {
         </Html>
         <ambientLight intensity={2} />
         <Suspense fallback={null}>
-          <EarthModel articles={locationBasedArticles!} />
+          <EarthModel
+            articles={locationBasedArticles!}
+            setIsAnyOpen={setIsAnyOpen}
+            isAnyOpen={isAnyOpen}
+          />
           <Environment files="/hdr/HDR_white_local_star.hdr" background />
         </Suspense>
         <EarthOrbitControls />
