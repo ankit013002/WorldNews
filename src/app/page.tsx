@@ -1,7 +1,7 @@
-import NewsData from "@/components/NewsData";
 import World from "@/r3f/World";
 import Image from "next/image";
 import { GetLocationsOfArticles } from "./utils/LocationSystem";
+import { getLocationsOfArticles } from "./utils/LocationSystem";
 
 export type ArticleType = {
   author: string;
@@ -21,16 +21,16 @@ export type ArticleType = {
 export default async function Home() {
   const url = new URL("https://newsapi.org/v2/top-headlines");
   url.searchParams.set("pageSize", "15");
-  url.searchParams.set("category", "technology");
+  url.searchParams.set("category", "politics");
   url.searchParams.set("apiKey", process.env.NEWS_API_KEY!);
 
   const response = await fetch(url.toString());
   const resJson = await response.json();
   const articles: ArticleType[] = resJson.articles;
 
-  const serializedArticles = await GetLocationsOfArticles(articles);
+  const locations = await getLocationsOfArticles(articles);
 
-  console.log(articles);
+  console.log(locations);
 
   return (
     <div className="min-h-screen min-w-screen flex flex-col justify-items-center items-center gap-y-5">
@@ -40,7 +40,7 @@ export default async function Home() {
           <div key={index} className="card bg-base-100 w-[50vw] shadow-sm">
             <figure>
               <Image
-                src={article.urlToImage}
+                src={article.urlToImage ?? null}
                 alt="Image"
                 width={1000}
                 height={1000}
