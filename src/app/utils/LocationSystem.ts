@@ -5,11 +5,19 @@ export type ArticleType = {
   author: string;
   description: string;
   publishedAt: string;
-  source: { id?: string; name: string };
+  source: {
+    id?: string;
+    name: string;
+  };
   title: string;
-  url: string;
+  urL: string;
   urlToImage: string;
   content?: string;
+  location?: {
+    country?: string | null;
+    lat?: number;
+    lon?: number;
+  };
 };
 
 async function ollamaChat(prompt: string): Promise<string> {
@@ -62,7 +70,6 @@ Text:
 ${seed}`;
 
   const text = (await ollamaChat(prompt)).trim();
-  console.log("[LLM raw]", text);
 
   if (text === "null") return null;
 
@@ -118,7 +125,19 @@ export async function getLocationsOfArticles(
     console.log("Article Description:", article.description);
     try {
       const place = await extractPlace(article);
-      results.push(place ? await geocode(place) : null);
+      console.log(place);
+      if (place) {
+        const geocodedValues = await geocode(place);
+        if (geocodedValues != null) {
+          article.location = {
+            country: geocodedValues?.country,
+            lat: geocodedValues.lat,
+            lon: geocodedValues.lon,
+          };
+        }
+      }
+      console.log(article.location?.lat);
+      console.log(article.location?.lon);
     } catch (err) {
       console.error("[pipeline]", err);
       results.push(null);

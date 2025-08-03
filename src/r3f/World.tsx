@@ -117,13 +117,12 @@ const EarthModel = ({ articles }: WorldProps) => {
     <group ref={groupRef} scale={0.8}>
       <primitive object={scene} />
       {articles.map((article, index) => {
-        const { lat, long } = getlatLong();
         return (
           <Pin
             title={article.title}
             key={index}
-            lat={newsItem.lat}
-            lon={newsItem.long}
+            lat={article.location.lat}
+            lon={article.location.lon}
             radius={5}
             size={0.03}
             color="red"
