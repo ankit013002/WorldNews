@@ -24,13 +24,15 @@ const Filter: React.FC<FilterProps> = ({
   ];
 
   return (
-    <div className="absolute top-0 dock dock-xl bg-gray-200/3 select-none pointer-events-auto">
+    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 mt-4 px-4 py-2 bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 backdrop-blur-lg border border-white/20 rounded-2xl flex space-x-4 z-50 select-none pointer-events-auto">
       {categories.map(({ key, icon }) => (
         <button
           key={key}
           onClick={() => setArticleSelection(key)}
-          className={`dock-item flex flex-col items-center ${
-            articleSelection === key ? "dock-active" : ""
+          className={`flex flex-col items-center justify-center px-3 py-1 rounded-lg cursor-pointer ${
+            articleSelection === key
+              ? "bg-white/20 backdrop-blur-md text-white"
+              : "text-white/70 hover:bg-white/10 hover:backdrop-blur-sm"
           }`}
         >
           {icon}

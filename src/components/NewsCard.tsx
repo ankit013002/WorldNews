@@ -49,7 +49,7 @@ const NewsCard = ({
         </div>
         {setExpand && setIsAnyOpen && setThisOpen && camera ? (
           <button
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            className="cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
             onClick={(e) => {
               e.stopPropagation();
               setExpand(false);
@@ -76,7 +76,7 @@ const NewsCard = ({
           setFocusedArticle &&
           setIsAnyOpen && (
             <button
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+              className="cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsAnyOpen(false);

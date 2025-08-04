@@ -27,6 +27,7 @@ import {
   TbLayoutSidebarRightCollapse,
 } from "react-icons/tb";
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import { BsNewspaper } from "react-icons/bs";
 
 interface WorldProps {
   articles: ArticleType[];
@@ -87,7 +88,7 @@ function Pin({
                   }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-white/25 backdrop-blur-lg border border-gray-200/50 rounded-2xl shadow-2xl w-[60vw] max-w-[800px] h-[65vh] max-h-[600px] flex flex-col overflow-hidden"
+                  className="bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl w-[60vw] max-w-[800px] h-[65vh] max-h-[600px] flex flex-col overflow-hidden"
                 >
                   <NewsCard
                     article={article}
@@ -104,7 +105,7 @@ function Pin({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                   transition={{ duration: 0.3 }}
-                  className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold cursor-pointer shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+                  className="cursor-pointer flex items-center justify-center p-2 rounded-full bg-gradient-to-r from-red-500/40 via-purple-500/40 to-blue-500/40 hover:from-red-500/60 hover:via-purple-500/60 hover:to-blue-500/60 text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
                   onClick={(e) => {
                     e.stopPropagation();
                     setExpand(true);
@@ -114,7 +115,7 @@ function Pin({
                   }}
                   title={article.title}
                 >
-                  !
+                  <BsNewspaper />
                 </motion.button>
               )}
             </AnimatePresence>
@@ -277,10 +278,11 @@ export default function World() {
               <div className="absolute flex flex-col right-0 mx-[1vw] gap-y-5">
                 <div className="flex justify-end">
                   <button
+                    data-tip="Search for News"
                     onClick={() => setSearchButtonPressed(!searchButtonPressed)}
-                    className="btn bg-gray-300/5 w-auto hover:bg-gray-300/10 border-none rounded-full"
+                    className="tooltip tooltip-left cursor-pointer p-2 rounded-full bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 text-white hover:from-red-500/30 hover:via-purple-500/30 hover:to-blue-500/30 transition-all duration-200 shadow-lg border-none"
                   >
-                    <FaMagnifyingGlass />
+                    <FaMagnifyingGlass className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -360,7 +362,7 @@ export default function World() {
                 </div>
               </div>
               {focusedArticle && (
-                <div className="top-[25vh] left-[25vw] absolute bg-white/25 backdrop-blur-lg border border-gray-200/50 rounded-2xl shadow-2xl w-[60vw] max-w-[800px] h-[65vh] max-h-[600px] flex flex-col overflow-hidden">
+                <div className="top-[25vh] left-[25vw] absolute bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 rounded-2xl backdrop-blur-lg border border-gray-200/50 shadow-2xl w-[60vw] max-w-[800px] h-[65vh] max-h-[600px] flex flex-col overflow-hidden">
                   <NewsCard
                     setIsAnyOpen={setIsAnyOpen}
                     article={focusedArticle}
@@ -385,14 +387,14 @@ export default function World() {
                           }}
                           onPointerDown={(e) => e.stopPropagation()}
                           key={index}
-                          className="card bg-gray-200/5 w-85 shadow-sm cursor-pointer"
+                          className="card bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 w-85 shadow-sm cursor-pointer"
                         >
                           {article.urlToImage &&
                             article.urlToImage.length > 0 && (
                               <figure>
                                 <Image
                                   src={article.urlToImage}
-                                  alt="Shoes"
+                                  alt="Image cannot be shown due to source"
                                   width={1000}
                                   height={1000}
                                 />
@@ -446,13 +448,13 @@ export default function World() {
                     }`}
                   >
                     <button
-                      className="btn btn-ghost w-10 p-0"
                       onClick={() => setSideBarCollapsed(!sideBarCollapsed)}
+                      className="cursor-pointer p-2 rounded-full bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 text-white hover:from-red-500/30 hover:via-purple-500/30 hover:to-blue-500/30 transition-all duration-200 shadow-lg border-none focus:outline-none"
                     >
                       {sideBarCollapsed ? (
-                        <TbLayoutSidebarRightCollapse className="w-full h-full" />
+                        <TbLayoutSidebarRightCollapse className="w-8 h-8" />
                       ) : (
-                        <TbLayoutSidebarLeftCollapse className="w-full h-full" />
+                        <TbLayoutSidebarLeftCollapse className="w-8 h-8" />
                       )}
                     </button>
                   </div>
